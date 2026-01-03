@@ -18,12 +18,12 @@ export default function Home() {
     const items: MenuItem[] = [
       {
         sabor: 'BACON COM CHEDDAR',
-        descricao: 'Batata cozida recheada com bacon, cheddar e milho.',
+        descricao: 'Batata cozida recheada com bacon, cheddar, milho e tomate.',
         preco: 'R$ 24,90'
       },
       {
         sabor: 'BACON COM CATUPIRY',
-        descricao: 'Batata cozida recheada com bacon, catupiry e milho.',
+        descricao: 'Batata cozida recheada com bacon, catupiry, milho e tomate.',
         preco: 'R$ 24,90'
       },
       {
@@ -67,7 +67,7 @@ export default function Home() {
         preco: 'R$ 24,90'
       },
       {
-        sabor: 'STROGONOFF DE FRANGO (ESPECIAL)',
+        sabor: 'STROGONOFF DE FRANGO',
         descricao: 'Batata cozida recheada com strogonoff de frango, milho e tomate.',
         preco: 'R$ 29,90'
       }
