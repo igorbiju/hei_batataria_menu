@@ -67,7 +67,7 @@ export default function Home() {
         preco: 'R$ 24,90'
       },
       {
-        sabor: 'STROGONOFF DE FRANGO',
+        sabor: 'STROGONOFF DE FRANGO (ESPECIAL)',
         descricao: 'Batata cozida recheada com strogonoff de frango, milho e tomate.',
         preco: 'R$ 29,90'
       }
