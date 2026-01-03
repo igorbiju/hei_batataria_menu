@@ -18,42 +18,42 @@ export default function Home() {
     const items: MenuItem[] = [
       {
         sabor: 'BACON COM CHEDDAR',
-        descricao: 'Batata cozida recheada com bacon, cheddar, milho e tomate.',
+        descricao: 'Batata cozida recheada com bacon, cheddar, muçarela, milho e tomate.',
         preco: 'R$ 24,90'
       },
       {
         sabor: 'BACON COM CATUPIRY',
-        descricao: 'Batata cozida recheada com bacon, catupiry, milho e tomate.',
+        descricao: 'Batata cozida recheada com bacon, catupiry, muçarela, tomate e milho.',
         preco: 'R$ 24,90'
       },
       {
         sabor: 'CALABRESA COM CHEDDAR',
-        descricao: 'Batata cozida recheada com calabresa, cheddar, milho e tomate.',
+        descricao: 'Batata cozida recheada com calabresa, cheddar, muçarela, milho e tomate.',
         preco: 'R$ 24,90'
       },
       {
         sabor: 'CALABRESA COM CATUPIRY',
-        descricao: 'Batata cozida recheada com calabresa, catupiry, milho e tomate.',
+        descricao: 'Batata cozida recheada com calabresa, catupiry, muçarela, milho e tomate.',
         preco: 'R$ 24,90'
       },
       {
         sabor: 'CARNE COM CHEDDAR',
-        descricao: 'Batata cozida recheada com carne, cheddar, milho e tomate.',
+        descricao: 'Batata cozida recheada com carne, cheddar, muçarela, milho e tomate.',
         preco: 'R$ 24,90'
       },
       {
         sabor: 'CARNE COM CATUPIRY',
-        descricao: 'Batata cozida recheada com carne, catupiry, milho e tomate.',
+        descricao: 'Batata cozida recheada com carne, catupiry, muçarela, milho e tomate.',
         preco: 'R$ 24,90'
       },
       {
         sabor: 'PALMITO COM CHEDDAR',
-        descricao: 'Batata cozida recheada com palmito, cheddar, milho e tomate.',
+        descricao: 'Batata cozida recheada com palmito, cheddar, muçarela, milho e tomate.',
         preco: 'R$ 24,90'
       },
       {
         sabor: 'PALMITO COM CATUPIRY',
-        descricao: 'Batata cozida recheada com palmito, catupiry, milho e tomate.',
+        descricao: 'Batata cozida recheada com palmito, catupiry, muçarela, milho e tomate.',
         preco: 'R$ 24,90'
       },
       {
@@ -63,12 +63,12 @@ export default function Home() {
       },
       {
         sabor: 'HOT DOG (NOVO!)',
-        descricao: 'Batata cozida recheada com salsicha ao molho, milho e tomate.',
+        descricao: 'Batata cozida recheada com salsicha ao molho, muçarela, milho e tomate.',
         preco: 'R$ 24,90'
       },
       {
-        sabor: 'STROGONOFF DE FRANGO',
-        descricao: 'Batata cozida recheada com strogonoff de frango, milho e tomate.',
+        sabor: 'STROGONOFF DE FRANGO (ESPECIAL!)',
+        descricao: 'Batata cozida recheada com strogonoff de frango, muçarela, milho e tomate.',
         preco: 'R$ 29,90'
       }
     ];
