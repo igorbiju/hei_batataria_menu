@@ -45,6 +45,10 @@ export default function MenuCard({ sabor, descricao, preco, isNew }: MenuCardPro
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
             loading="lazy"
           />
+          {/* Aviso de foto meramente ilustrativa */}
+          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs px-2 py-1 text-center">
+            Foto meramente ilustrativa
+          </div>
         </div>
       )}
 

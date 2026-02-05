@@ -2,6 +2,7 @@ import MenuCard from '@/components/MenuCard';
 import FloatingContact from '@/components/FloatingContact';
 import OrderForm from '@/components/OrderForm';
 import BusinessHours from '@/components/BusinessHours';
+import ShareButton from '@/components/ShareButton';
 import { ChefHat } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -253,6 +254,9 @@ export default function Home() {
 
       {/* Botão flutuante de contato */}
       <FloatingContact phone="(43) 9-8869-7421" />
+
+      {/* Botão de compartilhamento no WhatsApp */}
+      <ShareButton />
 
       {/* Animação de fade-in */}
       <style>{`
