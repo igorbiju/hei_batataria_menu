@@ -61,8 +61,17 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
     const cidadeNormalizada = cidade.toLowerCase().trim();
     const totalBatatas = pedidoItems.reduce((sum, item) => sum + item.quantidade, 0);
     
-    // Verifica se é Ivaiporã (com várias variações de digitação)
-    if (cidadeNormalizada === 'ivaipora' || cidadeNormalizada === 'ivaiporã' || cidadeNormalizada === 'ivaiporá') {
+    // Remove acentos para comparação mais robusta
+    const cidadeSemAcento = cidadeNormalizada
+      .replace(/ã/g, 'a')
+      .replace(/á/g, 'a')
+      .replace(/é/g, 'e')
+      .replace(/í/g, 'i')
+      .replace(/ó/g, 'o')
+      .replace(/ú/g, 'u')
+      .replace(/\s+/g, '');
+    
+    if (cidadeSemAcento === 'ivaipora') {
       return 10;
     } else {
       // Cidades próximas
