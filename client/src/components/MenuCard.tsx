@@ -10,18 +10,18 @@ interface MenuCardProps {
 
 // Mapa de imagens para cada sabor
 const imagemMap: Record<string, string> = {
-  'BACON COM CHEDDAR': 'https://private-us-east-1.manuscdn.com/sessionFile/Nr14IlTnA1Lzfd8COBHpfe/sandbox/ilWzeK2OBSP8gEukNsNFkj-img-1_1770326833000_na1fn_YmF0YXRhLWJhY29uLWNoZWRkYXI.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80',
-  'BACON COM CATUPIRY': 'https://private-us-east-1.manuscdn.com/sessionFile/Nr14IlTnA1Lzfd8COBHpfe/sandbox/ilWzeK2OBSP8gEukNsNFkj-img-2_1770326835000_na1fn_YmF0YXRhLWJhY29uLWNhdHVwaXJ5.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80',
-  'CALABRESA COM CHEDDAR': 'https://private-us-east-1.manuscdn.com/sessionFile/Nr14IlTnA1Lzfd8COBHpfe/sandbox/ilWzeK2OBSP8gEukNsNFkj-img-3_1770326829000_na1fn_YmF0YXRhLWNhbGFicmVzYS1jaGVkZGFy.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80',
-  'CALABRESA COM CATUPIRY': 'https://private-us-east-1.manuscdn.com/sessionFile/Nr14IlTnA1Lzfd8COBHpfe/sandbox/ilWzeK2OBSP8gEukNsNFkj-img-4_1770326833000_na1fn_YmF0YXRhLWNhbGFicmVzYS1jYXR1cGlyeQ.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80',
-  'CARNE COM CHEDDAR': 'https://private-us-east-1.manuscdn.com/sessionFile/Nr14IlTnA1Lzfd8COBHpfe/sandbox/ilWzeK2OBSP8gEukNsNFkj-img-5_1770326835000_na1fn_YmF0YXRhLWNhcm5lLWNoZWRkYXI.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80',
-  'CARNE COM CATUPIRY': 'https://private-us-east-1.manuscdn.com/sessionFile/Nr14IlTnA1Lzfd8COBHpfe/sandbox/JF6TopStEFVytyAyy3HpC6-img-1_1770326858000_na1fn_YmF0YXRhLWNhcm5lLWNhdHVwaXJ5.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80',
-  'PALMITO COM CHEDDAR': 'https://private-us-east-1.manuscdn.com/sessionFile/Nr14IlTnA1Lzfd8COBHpfe/sandbox/JF6TopStEFVytyAyy3HpC6-img-2_1770326861000_na1fn_YmF0YXRhLXBhbG1pdG8tY2hlZGRhcg.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80',
-  'PALMITO COM CATUPIRY': 'https://private-us-east-1.manuscdn.com/sessionFile/Nr14IlTnA1Lzfd8COBHpfe/sandbox/JF6TopStEFVytyAyy3HpC6-img-3_1770326862000_na1fn_YmF0YXRhLXBhbG1pdG8tY2F0dXBpcnk.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80',
-  'PIZZA': 'https://private-us-east-1.manuscdn.com/sessionFile/Nr14IlTnA1Lzfd8COBHpfe/sandbox/JF6TopStEFVytyAyy3HpC6-img-4_1770326859000_na1fn_YmF0YXRhLXBpenph.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80',
-  'HOT DOG (NOVO!)': 'https://private-us-east-1.manuscdn.com/sessionFile/Nr14IlTnA1Lzfd8COBHpfe/sandbox/JF6TopStEFVytyAyy3HpC6-img-5_1770326863000_na1fn_YmF0YXRhLWhvdGRvZw.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80',
-  'STROGONOFF DE FRANGO (ESPECIAL!)': 'https://private-us-east-1.manuscdn.com/sessionFile/Nr14IlTnA1Lzfd8COBHpfe/sandbox/xNzacHHouaLTPBxP3Pb4Tw-img-1_1770326889000_na1fn_YmF0YXRhLXN0cm9nb25vZmY.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80',
-  'COSTELA': 'https://private-us-east-1.manuscdn.com/sessionFile/Nr14IlTnA1Lzfd8COBHpfe/sandbox/xNzacHHouaLTPBxP3Pb4Tw-img-2_1770326887000_na1fn_YmF0YXRhLWNvc3RlbGE.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80',
+  'BACON COM CHEDDAR': 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663183348486/SgXbQKTtFNoftatU.png',
+  'BACON COM CATUPIRY': 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663183348486/teHEQwUzGGTTImKA.png',
+  'CALABRESA COM CHEDDAR': 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663183348486/BDVyBleHpgmblgIe.png',
+  'CALABRESA COM CATUPIRY': 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663183348486/hmowCiSgHBzvXVhz.png',
+  'CARNE COM CHEDDAR': 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663183348486/tbCjNkQcOyixIHAK.png',
+  'CARNE COM CATUPIRY': 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663183348486/HTxHHaooEZcWIYrL.png',
+  'PALMITO COM CHEDDAR': 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663183348486/FNbZWHlCHmqbpYrw.png',
+  'PALMITO COM CATUPIRY': 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663183348486/eTLvkkzmUKHWteej.png',
+  'PIZZA': 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663183348486/eshDnibkNySmslgd.png',
+  'HOT DOG (NOVO!)': 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663183348486/BPaSdORlpVIlprtT.png',
+  'STROGONOFF DE FRANGO (ESPECIAL!)': 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663183348486/aVTxSYOTaYYtNTwV.png',
+  'COSTELA': 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663183348486/IWjuhgcbypkzSnOl.png',
 };
 
 export default function MenuCard({ sabor, descricao, preco, isNew }: MenuCardProps) {
@@ -43,6 +43,7 @@ export default function MenuCard({ sabor, descricao, preco, isNew }: MenuCardPro
             src={imagemUrl}
             alt={sabor}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            loading="lazy"
           />
         </div>
       )}
