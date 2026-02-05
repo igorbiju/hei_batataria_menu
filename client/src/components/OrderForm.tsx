@@ -61,7 +61,8 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
     const cidadeNormalizada = cidade.toLowerCase().trim();
     const totalBatatas = pedidoItems.reduce((sum, item) => sum + item.quantidade, 0);
     
-    if (cidadeNormalizada === 'ivaipora') {
+    // Verifica se é Ivaiporã (com várias variações de digitação)
+    if (cidadeNormalizada === 'ivaipora' || cidadeNormalizada === 'ivaiporã' || cidadeNormalizada === 'ivaiporá') {
       return 10;
     } else {
       // Cidades próximas
@@ -185,6 +186,9 @@ ${detalhePedido}
           />
           <p className="text-xs text-gray-500 mt-1">
             Ivaiporã: R$ 10 | Outras cidades: R$ 30 (R$ 20 com 4+ batatas)
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            (Digite "Ivaiporã" ou "Ivaipora")
           </p>
         </div>
 
