@@ -18,9 +18,27 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
   const [nomeCliente, setNomeCliente] = useState('');
   const [telefoneCliente, setTelefoneCliente] = useState('');
   const [enderecoEntrega, setEnderecoEntrega] = useState('');
+  const [cidade, setCidade] = useState('');
+
+  const calcularFrete = () => {
+    if (!cidade) return 0;
+
+    const cidadeNormalizada = cidade.toLowerCase().trim();
+    
+    if (cidadeNormalizada === 'ivaipora') {
+      return 10;
+    } else {
+      // Cidades próximas
+      if (quantidade >= 4) {
+        return 20;
+      } else {
+        return 30;
+      }
+    }
+  };
 
   const handleEnviarPedido = () => {
-    if (!selectedSabor || !nomeCliente || !telefoneCliente) {
+    if (!selectedSabor || !nomeCliente || !telefoneCliente || !cidade) {
       alert('Por favor, preencha todos os campos obrigatórios!');
       return;
     }
@@ -30,13 +48,16 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
 
     // Extrair preço numérico
     const preco = parseFloat(sabor.preco.replace('R$', '').replace(',', '.'));
-    const total = (preco * quantidade).toFixed(2).replace('.', ',');
+    const subtotal = preco * quantidade;
+    const frete = calcularFrete();
+    const total = (subtotal + frete).toFixed(2).replace('.', ',');
 
     // Montar mensagem para WhatsApp
     const mensagem = `Olá! Gostaria de fazer um pedido na HEI! BATATARIA
 
 *Cliente:* ${nomeCliente}
 *Telefone:* ${telefoneCliente}
+*Cidade:* ${cidade}
 ${enderecoEntrega ? `*Endereço:* ${enderecoEntrega}` : ''}
 
 *Pedido:*
@@ -44,7 +65,9 @@ ${quantidade}x ${sabor.sabor}
 ${sabor.descricao}
 
 *Valor unitário:* ${sabor.preco}
-*Total:* R$ ${total}`;
+*Subtotal:* R$ ${subtotal.toFixed(2).replace('.', ',')}
+*Frete:* R$ ${frete.toFixed(2).replace('.', ',')}
+*TOTAL:* R$ ${total}`;
 
     // Número do WhatsApp (sem formatação)
     const numeroWhatsApp = '5543988697421';
@@ -52,6 +75,13 @@ ${sabor.descricao}
 
     window.open(urlWhatsApp, '_blank');
   };
+
+  const preco = selectedSabor 
+    ? parseFloat((menuItems.find(item => item.sabor === selectedSabor)?.preco || 'R$ 0').replace('R$', '').replace(',', '.'))
+    : 0;
+  const subtotal = preco * quantidade;
+  const frete = calcularFrete();
+  const total = subtotal + frete;
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 border-2 border-red-500">
@@ -84,6 +114,23 @@ ${sabor.descricao}
             placeholder="(43) 9-9999-9999"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
+        </div>
+
+        {/* Cidade de Entrega */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Sua Cidade *
+          </label>
+          <input
+            type="text"
+            value={cidade}
+            onChange={(e) => setCidade(e.target.value)}
+            placeholder="Ex: Ivaiporã, Apucarana, etc..."
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Ivaiporã: R$ 10 | Outras cidades: R$ 30 (R$ 20 com 4+ batatas)
+          </p>
         </div>
 
         {/* Endereço de Entrega */}
@@ -157,18 +204,24 @@ ${sabor.descricao}
           </div>
         </div>
 
-        {/* Resumo do Pedido */}
+        {/* Resumo do Pedido com Frete */}
         {selectedSabor && (
-          <div className="bg-gray-100 p-4 rounded-lg">
-            <p className="text-sm text-gray-700 mb-2">
-              <span className="font-semibold">Resumo:</span>
-            </p>
-            <p className="text-sm text-gray-700">
-              {quantidade}x {selectedSabor}
-            </p>
-            <p className="text-lg font-bold text-red-600 mt-2">
-              Total: R$ {(parseFloat((menuItems.find(item => item.sabor === selectedSabor)?.preco || 'R$ 0').replace('R$', '').replace(',', '.')) * quantidade).toFixed(2).replace('.', ',')}
-            </p>
+          <div className="bg-gray-100 p-4 rounded-lg space-y-2">
+            <p className="text-sm text-gray-700 font-semibold">Resumo do Pedido:</p>
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between text-gray-700">
+                <span>{quantidade}x {selectedSabor}</span>
+                <span>R$ {subtotal.toFixed(2).replace('.', ',')}</span>
+              </div>
+              <div className="flex justify-between text-gray-700">
+                <span>Frete ({cidade || 'cidade não informada'})</span>
+                <span className="font-semibold">R$ {frete.toFixed(2).replace('.', ',')}</span>
+              </div>
+              <div className="border-t border-gray-300 pt-2 flex justify-between">
+                <span className="font-bold text-gray-900">Total:</span>
+                <span className="text-lg font-bold text-red-600">R$ {total.toFixed(2).replace('.', ',')}</span>
+              </div>
+            </div>
           </div>
         )}
 
