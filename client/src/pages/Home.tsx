@@ -1,5 +1,6 @@
 import MenuCard from '@/components/MenuCard';
 import FloatingContact from '@/components/FloatingContact';
+import OrderForm from '@/components/OrderForm';
 import { ChefHat } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -166,12 +167,21 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Order Form Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto">
+            {!loading && <OrderForm menuItems={menuItems} />}
+          </div>
+        </div>
+      </section>
+
       {/* Seção de informações */}
       <section className="py-12 bg-gradient-to-r from-[#2C2C2C] to-[#1A1A1A] text-white">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div className="space-y-2">
-              <div className="text-4xl font-display text-[#FFD700]">11</div>
+              <div className="text-4xl font-display text-[#FFD700]">12</div>
               <p className="text-gray-300">Sabores disponíveis</p>
             </div>
             <div className="space-y-2">
