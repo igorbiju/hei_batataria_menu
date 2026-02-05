@@ -38,8 +38,8 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
   };
 
   const handleEnviarPedido = () => {
-    if (!selectedSabor || !nomeCliente || !telefoneCliente || !cidade) {
-      alert('Por favor, preencha todos os campos obrigatórios!');
+    if (!selectedSabor || !nomeCliente || !telefoneCliente || !enderecoEntrega || !cidade) {
+      alert('Por favor, preencha todos os campos obrigatórios (Nome, Telefone, Endereço e Cidade)!');
       return;
     }
 
@@ -136,7 +136,7 @@ ${sabor.descricao}
         {/* Endereço de Entrega */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Endereço de Entrega (opcional)
+            Endereço de Entrega *
           </label>
           <input
             type="text"
