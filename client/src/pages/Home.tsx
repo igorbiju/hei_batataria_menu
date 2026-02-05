@@ -1,6 +1,7 @@
 import MenuCard from '@/components/MenuCard';
 import FloatingContact from '@/components/FloatingContact';
 import OrderForm from '@/components/OrderForm';
+import BusinessHours from '@/components/BusinessHours';
 import { ChefHat } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -172,6 +173,15 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto">
             {!loading && <OrderForm menuItems={menuItems} />}
+          </div>
+        </div>
+      </section>
+
+      {/* Business Hours Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto">
+            <BusinessHours />
           </div>
         </div>
       </section>
