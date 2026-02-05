@@ -70,6 +70,11 @@ export default function Home() {
         sabor: 'STROGONOFF DE FRANGO (ESPECIAL!)',
         descricao: 'Batata cozida recheada com strogonoff de frango, muçarela, milho e tomate.',
         preco: 'R$ 29,90'
+      },
+      {
+        sabor: 'COSTELA',
+        descricao: 'Batata cozida recheada com costela desfiada, muçarela, milho e tomate.',
+        preco: 'R$ 34,90'
       }
     ];
 
