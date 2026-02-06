@@ -436,12 +436,7 @@ export default function OrderForm({ menuItems, cuponsDisponiveis = [] }: OrderFo
             
             {!cupomAplicado ? (
               <div className="space-y-3">
-                {cuponsDisponiveis.length > 0 && (
-                  <p className="text-sm text-gray-600 mb-3">Cupons disponíveis: {cuponsDisponiveis.map(c => c.codigo).join(', ')}</p>
-                )}
-                {cuponsDisponiveis.length === 0 && (
-                  <p className="text-sm text-red-600 mb-3">Nenhum cupom disponível no momento</p>
-                )}
+                <p className="text-sm text-gray-600 mb-3">Digite o cupom que você recebeu:</p>
                 <div className="flex gap-2">
                   <input
                     type="text"
