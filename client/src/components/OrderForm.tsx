@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, X } from 'lucide-react';
+import { MessageCircle, X, Plus, Minus } from 'lucide-react';
 
 interface MenuItem {
   sabor: string;
@@ -15,12 +15,30 @@ interface OrderFormProps {
 interface PedidoItem {
   sabor: string;
   quantidade: number;
+  adicionais: string[];
 }
+
+// Mapeamento de quais adicionais estão disponíveis em cada sabor
+const adicionaisDisponiveis: { [key: string]: string[] } = {
+  'BACON COM CHEDDAR': ['catupiry', 'calabresa', 'muçarela'],
+  'BACON COM CATUPIRY': ['cheddar', 'bacon', 'calabresa', 'muçarela'],
+  'CALABRESA COM CHEDDAR': ['bacon', 'catupiry', 'muçarela'],
+  'CALABRESA COM CATUPIRY': ['bacon', 'cheddar', 'muçarela'],
+  'CARNE COM CHEDDAR': ['bacon', 'calabresa', 'catupiry', 'muçarela'],
+  'CARNE COM CATUPIRY': ['bacon', 'calabresa', 'cheddar', 'muçarela'],
+  'PALMITO COM CHEDDAR': ['bacon', 'calabresa', 'catupiry', 'muçarela'],
+  'PALMITO COM CATUPIRY': ['bacon', 'calabresa', 'cheddar', 'muçarela'],
+  'PIZZA': ['bacon', 'calabresa', 'catupiry', 'cheddar', 'muçarela'],
+  'HOT DOG (NOVO!)': ['bacon', 'calabresa', 'cheddar', 'catupiry', 'muçarela'],
+  'STROGONOFF DE FRANGO': ['bacon', 'calabresa', 'cheddar', 'catupiry', 'muçarela'],
+  'COSTELA': ['bacon', 'calabresa', 'cheddar', 'catupiry', 'muçarela'],
+};
 
 export default function OrderForm({ menuItems }: OrderFormProps) {
   const [pedidoItems, setPedidoItems] = useState<PedidoItem[]>([]);
   const [selectedSabor, setSelectedSabor] = useState('');
   const [quantidade, setQuantidade] = useState(1);
+  const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<string[]>([]);
   const [nomeCliente, setNomeCliente] = useState('');
   const [telefoneCliente, setTelefoneCliente] = useState('');
   const [enderecoEntrega, setEnderecoEntrega] = useState('');
@@ -32,27 +50,30 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
       return;
     }
 
-    const itemExistente = pedidoItems.find(item => item.sabor === selectedSabor);
-    
-    if (itemExistente) {
-      // Se o sabor já existe, aumenta a quantidade
-      setPedidoItems(pedidoItems.map(item =>
-        item.sabor === selectedSabor
-          ? { ...item, quantidade: item.quantidade + quantidade }
-          : item
-      ));
-    } else {
-      // Adiciona novo sabor
-      setPedidoItems([...pedidoItems, { sabor: selectedSabor, quantidade }]);
-    }
+    const novoItem: PedidoItem = {
+      sabor: selectedSabor,
+      quantidade,
+      adicionais: adicionaisSelecionados,
+    };
+
+    setPedidoItems([...pedidoItems, novoItem]);
 
     // Reset dos campos
     setSelectedSabor('');
     setQuantidade(1);
+    setAdicionaisSelecionados([]);
   };
 
-  const removerSabor = (sabor: string) => {
-    setPedidoItems(pedidoItems.filter(item => item.sabor !== sabor));
+  const removerSabor = (index: number) => {
+    setPedidoItems(pedidoItems.filter((_, i) => i !== index));
+  };
+
+  const toggleAdicional = (adicional: string) => {
+    setAdicionaisSelecionados(prev =>
+      prev.includes(adicional)
+        ? prev.filter(a => a !== adicional)
+        : [...prev, adicional]
+    );
   };
 
   const calcularFrete = () => {
@@ -83,6 +104,13 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
     }
   };
 
+  const obterPreco = (sabor: string): number => {
+    const item = menuItems.find(m => m.sabor === sabor);
+    if (!item) return 0;
+    const preco = item.preco.replace('R$', '').replace(',', '.').trim();
+    return parseFloat(preco);
+  };
+
   const handleEnviarPedido = () => {
     if (!nomeCliente || !telefoneCliente || !enderecoEntrega || !cidade) {
       alert('Por favor, preencha todos os campos obrigatórios (Nome, Telefone, Endereço e Cidade)!');
@@ -98,214 +126,182 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
     let subtotal = 0;
     let detalhePedido = '';
 
-    pedidoItems.forEach(item => {
-      const sabor = menuItems.find(m => m.sabor === item.sabor);
-      if (sabor) {
-        const preco = parseFloat(sabor.preco.replace('R$', '').replace(',', '.'));
-        const itemTotal = preco * item.quantidade;
-        subtotal += itemTotal;
-        detalhePedido += `${item.quantidade}x ${sabor.sabor}\n${sabor.descricao}\n*Subtotal:* R$ ${itemTotal.toFixed(2).replace('.', ',')}\n\n`;
+    pedidoItems.forEach((item, index) => {
+      const precoUnitario = obterPreco(item.sabor);
+      const totalAdicionais = item.adicionais.length * 3;
+      const precoComAdicionais = precoUnitario + totalAdicionais;
+      const totalItem = precoComAdicionais * item.quantidade;
+
+      subtotal += totalItem;
+
+      detalhePedido += `${index + 1}. ${item.sabor} (${item.quantidade}x)\n`;
+      detalhePedido += `   Preço unitário: R$ ${precoUnitario.toFixed(2)}\n`;
+      
+      if (item.adicionais.length > 0) {
+        detalhePedido += `   Adicionais: ${item.adicionais.map(a => a.charAt(0).toUpperCase() + a.slice(1)).join(', ')} (${item.adicionais.length}x R$ 3,00)\n`;
+        detalhePedido += `   Subtotal adicionais: R$ ${(item.adicionais.length * 3).toFixed(2)}\n`;
       }
+      
+      detalhePedido += `   Total do item: R$ ${totalItem.toFixed(2)}\n\n`;
     });
 
     const frete = calcularFrete();
-    const total = (subtotal + frete).toFixed(2).replace('.', ',');
+    const total = subtotal + frete;
 
-    // Montar mensagem para WhatsApp
-    const mensagem = `Olá! Gostaria de fazer um pedido na HEI! BATATARIA
+    const mensagem = `*NOVO PEDIDO HEI! BATATARIA* 🍟\n\n` +
+      `*Cliente:* ${nomeCliente}\n` +
+      `*Telefone:* ${telefoneCliente}\n` +
+      `*Endereço:* ${enderecoEntrega}\n` +
+      `*Cidade:* ${cidade}\n\n` +
+      `*DETALHES DO PEDIDO:*\n` +
+      `${detalhePedido}\n` +
+      `*Subtotal:* R$ ${subtotal.toFixed(2)}\n` +
+      `*Frete (${cidade}):* R$ ${frete.toFixed(2)}\n` +
+      `*TOTAL:* R$ ${total.toFixed(2)}\n\n` +
+      `Obrigado! 😊`;
 
-*Cliente:* ${nomeCliente}
-*Telefone:* ${telefoneCliente}
-*Cidade:* ${cidade}
-*Endereço:* ${enderecoEntrega}
-
-*Pedido:*
-${detalhePedido}
-*Subtotal:* R$ ${subtotal.toFixed(2).replace('.', ',')}
-*Frete:* R$ ${frete.toFixed(2).replace('.', ',')}
-*TOTAL:* R$ ${total}`;
-
-    // Número do WhatsApp (sem formatação)
     const numeroWhatsApp = '5543988697421';
     const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
-
     window.open(urlWhatsApp, '_blank');
   };
 
-  // Calcular subtotal e total
-  let subtotal = 0;
-  let totalBatatas = 0;
-
-  pedidoItems.forEach(item => {
-    const sabor = menuItems.find(m => m.sabor === item.sabor);
-    if (sabor) {
-      const preco = parseFloat(sabor.preco.replace('R$', '').replace(',', '.'));
-      subtotal += preco * item.quantidade;
-      totalBatatas += item.quantidade;
-    }
-  });
-
-  const frete = calcularFrete();
-  const total = subtotal + frete;
+  const adicionaisDisponivelParaSabor = selectedSabor ? (adicionaisDisponiveis[selectedSabor] || []) : [];
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 border-2 border-red-500">
-      <h2 className="text-2xl md:text-3xl font-bold text-red-600 mb-6">Faça seu Pedido</h2>
+    <div className="w-full max-w-4xl mx-auto px-4 py-12">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 border-4 border-red-500">
+        <h2 className="text-4xl font-bold text-red-600 mb-2 flex items-center gap-3">
+          <MessageCircle className="w-8 h-8" />
+          Faça Seu Pedido
+        </h2>
+        <p className="text-gray-600 mb-8">Selecione seus sabores, adicione adicionais e envie via WhatsApp!</p>
 
-      <div className="space-y-4">
-        {/* Nome do Cliente */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Seu Nome *
-          </label>
-          <input
-            type="text"
-            value={nomeCliente}
-            onChange={(e) => setNomeCliente(e.target.value)}
-            placeholder="Digite seu nome"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-        </div>
+        {/* Seção de Seleção de Sabor */}
+        <div className="bg-gradient-to-r from-red-50 to-yellow-50 rounded-xl p-6 mb-8 border-2 border-red-200">
+          <h3 className="text-xl font-bold text-red-600 mb-4">1. Escolha um Sabor</h3>
+          
+          <select
+            value={selectedSabor}
+            onChange={(e) => {
+              setSelectedSabor(e.target.value);
+              setAdicionaisSelecionados([]);
+            }}
+            className="w-full p-3 border-2 border-red-300 rounded-lg mb-4 focus:outline-none focus:border-red-500 bg-white"
+          >
+            <option value="">Selecione um sabor...</option>
+            {menuItems.map((item) => (
+              <option key={item.sabor} value={item.sabor}>
+                {item.sabor} - {item.preco}
+              </option>
+            ))}
+          </select>
 
-        {/* Telefone do Cliente */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Seu Telefone/WhatsApp *
-          </label>
-          <input
-            type="tel"
-            value={telefoneCliente}
-            onChange={(e) => setTelefoneCliente(e.target.value)}
-            placeholder="(43) 9-9999-9999"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-        </div>
-
-        {/* Cidade de Entrega */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Sua Cidade *
-          </label>
-          <input
-            type="text"
-            value={cidade}
-            onChange={(e) => setCidade(e.target.value)}
-            placeholder="Ex: Ivaiporã, Apucarana, etc..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Ivaiporã: R$ 10 | Outras cidades: R$ 30 (R$ 20 com 4+ batatas)
-          </p>
-          <p className="text-xs text-gray-400 mt-1">
-            (Digite "Ivaiporã" ou "Ivaipora")
-          </p>
-        </div>
-
-        {/* Endereço de Entrega */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Endereço de Entrega *
-          </label>
-          <input
-            type="text"
-            value={enderecoEntrega}
-            onChange={(e) => setEnderecoEntrega(e.target.value)}
-            placeholder="Rua, número, complemento..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-        </div>
-
-        {/* Seção de Adição de Sabores */}
-        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <h3 className="text-lg font-semibold text-blue-900 mb-3">Adicionar Sabores</h3>
-
-          {/* Seleção de Sabor */}
-          <div className="mb-3">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Escolha o Sabor *
-            </label>
-            <select
-              value={selectedSabor}
-              onChange={(e) => setSelectedSabor(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              <option value="">Selecione um sabor...</option>
-              {menuItems.map((item) => (
-                <option key={item.sabor} value={item.sabor}>
-                  {item.sabor} - {item.preco}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Descrição do Sabor Selecionado */}
           {selectedSabor && (
-            <div className="bg-white p-3 rounded-lg border-l-4 border-orange-500 mb-3">
-              <p className="text-sm text-gray-700">
-                <span className="font-semibold">Ingredientes: </span>
-                {menuItems.find(item => item.sabor === selectedSabor)?.descricao}
-              </p>
+            <div className="bg-white p-4 rounded-lg border-2 border-yellow-300 mb-4">
+              <p className="text-gray-700 font-semibold mb-2">Descrição:</p>
+              <p className="text-gray-600">{menuItems.find(m => m.sabor === selectedSabor)?.descricao}</p>
             </div>
           )}
 
-          {/* Quantidade */}
-          <div className="mb-3">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Quantidade
-            </label>
-            <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 mb-4">
+            <label className="font-semibold text-gray-700">Quantidade:</label>
+            <div className="flex items-center gap-2 border-2 border-red-300 rounded-lg">
               <button
                 onClick={() => setQuantidade(Math.max(1, quantidade - 1))}
-                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition"
+                className="p-2 hover:bg-red-100 transition"
               >
-                −
+                <Minus className="w-5 h-5 text-red-600" />
               </button>
-              <input
-                type="number"
-                value={quantidade}
-                onChange={(e) => setQuantidade(Math.max(1, parseInt(e.target.value) || 1))}
-                min="1"
-                className="w-20 px-4 py-2 border border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
+              <span className="px-4 font-bold text-lg">{quantidade}</span>
               <button
                 onClick={() => setQuantidade(quantidade + 1)}
-                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition"
+                className="p-2 hover:bg-red-100 transition"
               >
-                +
+                <Plus className="w-5 h-5 text-red-600" />
               </button>
             </div>
           </div>
-
-          {/* Botão Adicionar */}
-          <Button
-            onClick={adicionarSabor}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition"
-          >
-            + Adicionar Sabor ao Pedido
-          </Button>
         </div>
 
-        {/* Lista de Sabores Adicionados */}
+        {/* Seção de Adicionais */}
+        {selectedSabor && adicionaisDisponivelParaSabor.length > 0 && (
+          <div className="bg-gradient-to-r from-yellow-50 to-red-50 rounded-xl p-6 mb-8 border-2 border-yellow-300">
+            <h3 className="text-xl font-bold text-yellow-700 mb-4">2. Adicione Adicionais (R$ 3,00 cada)</h3>
+            <p className="text-sm text-gray-600 mb-4">Disponíveis para este sabor:</p>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {adicionaisDisponivelParaSabor.map((adicional) => (
+                <button
+                  key={adicional}
+                  onClick={() => toggleAdicional(adicional)}
+                  className={`p-3 rounded-lg font-semibold transition border-2 capitalize ${
+                    adicionaisSelecionados.includes(adicional)
+                      ? 'bg-yellow-400 border-yellow-600 text-yellow-900'
+                      : 'bg-white border-yellow-300 text-gray-700 hover:bg-yellow-100'
+                  }`}
+                >
+                  {adicional === 'muçarela' ? '🧀 Muçarela' : 
+                   adicional === 'cheddar' ? '🧀 Cheddar' :
+                   adicional === 'catupiry' ? '🧀 Catupiry' :
+                   adicional === 'bacon' ? '🥓 Bacon' :
+                   adicional === 'calabresa' ? '🌶️ Calabresa' : adicional}
+                </button>
+              ))}
+            </div>
+
+            {adicionaisSelecionados.length > 0 && (
+              <div className="mt-4 p-3 bg-white rounded-lg border-2 border-yellow-300">
+                <p className="text-sm font-semibold text-gray-700">
+                  Adicionais selecionados: {adicionaisSelecionados.map(a => a.charAt(0).toUpperCase() + a.slice(1)).join(', ')}
+                </p>
+                <p className="text-sm text-yellow-700 font-bold">
+                  +R$ {(adicionaisSelecionados.length * 3).toFixed(2)} por unidade
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Botão Adicionar */}
+        <Button
+          onClick={adicionarSabor}
+          disabled={!selectedSabor}
+          className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-4 rounded-lg text-lg mb-8 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          ✓ Adicionar ao Pedido
+        </Button>
+
+        {/* Resumo do Pedido */}
         {pedidoItems.length > 0 && (
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Sabores no Pedido</h3>
-            <div className="space-y-2">
-              {pedidoItems.map((item) => {
-                const sabor = menuItems.find(m => m.sabor === item.sabor);
-                const preco = sabor ? parseFloat(sabor.preco.replace('R$', '').replace(',', '.')) : 0;
-                const itemTotal = preco * item.quantidade;
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 mb-8 border-2 border-blue-300">
+            <h3 className="text-xl font-bold text-blue-600 mb-4">Seu Pedido ({pedidoItems.length} item{pedidoItems.length !== 1 ? 's' : ''})</h3>
+            
+            <div className="space-y-3 mb-4">
+              {pedidoItems.map((item, index) => {
+                const precoUnitario = obterPreco(item.sabor);
+                const totalAdicionais = item.adicionais.length * 3;
+                const precoComAdicionais = precoUnitario + totalAdicionais;
+                const totalItem = precoComAdicionais * item.quantidade;
 
                 return (
-                  <div key={item.sabor} className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
+                  <div key={index} className="bg-white p-3 rounded-lg border-2 border-blue-200 flex justify-between items-start">
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900">{item.quantidade}x {item.sabor}</p>
-                      <p className="text-sm text-gray-600">R$ {itemTotal.toFixed(2).replace('.', ',')}</p>
+                      <p className="font-bold text-gray-800">{item.sabor}</p>
+                      <p className="text-sm text-gray-600">Quantidade: {item.quantidade}x</p>
+                      {item.adicionais.length > 0 && (
+                        <p className="text-sm text-yellow-700 font-semibold">
+                          Adicionais: {item.adicionais.map(a => a.charAt(0).toUpperCase() + a.slice(1)).join(', ')}
+                        </p>
+                      )}
+                      <p className="text-sm text-gray-600">
+                        R$ {precoUnitario.toFixed(2)} {item.adicionais.length > 0 && `+ R$ ${totalAdicionais.toFixed(2)} adicionais`} = R$ {totalItem.toFixed(2)}
+                      </p>
                     </div>
                     <button
-                      onClick={() => removerSabor(item.sabor)}
-                      className="ml-2 text-red-500 hover:text-red-700 transition"
+                      onClick={() => removerSabor(index)}
+                      className="ml-4 p-2 text-red-600 hover:bg-red-100 rounded-lg transition"
                     >
-                      <X size={20} />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
                 );
@@ -314,40 +310,92 @@ ${detalhePedido}
           </div>
         )}
 
-        {/* Resumo do Pedido com Frete */}
+        {/* Informações do Cliente */}
+        <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 mb-8 border-2 border-gray-300">
+          <h3 className="text-xl font-bold text-gray-700 mb-4">3. Suas Informações</h3>
+          
+          <input
+            type="text"
+            placeholder="Nome completo *"
+            value={nomeCliente}
+            onChange={(e) => setNomeCliente(e.target.value)}
+            className="w-full p-3 border-2 border-gray-300 rounded-lg mb-3 focus:outline-none focus:border-red-500"
+          />
+          
+          <input
+            type="tel"
+            placeholder="Telefone (com DDD) *"
+            value={telefoneCliente}
+            onChange={(e) => setTelefoneCliente(e.target.value)}
+            className="w-full p-3 border-2 border-gray-300 rounded-lg mb-3 focus:outline-none focus:border-red-500"
+          />
+          
+          <input
+            type="text"
+            placeholder="Endereço de entrega (Rua, número, complemento) *"
+            value={enderecoEntrega}
+            onChange={(e) => setEnderecoEntrega(e.target.value)}
+            className="w-full p-3 border-2 border-gray-300 rounded-lg mb-3 focus:outline-none focus:border-red-500"
+          />
+          
+          <input
+            type="text"
+            placeholder="Cidade (ex: Ivaiporã) *"
+            value={cidade}
+            onChange={(e) => setCidade(e.target.value)}
+            className="w-full p-3 border-2 border-gray-300 rounded-lg mb-3 focus:outline-none focus:border-red-500"
+          />
+        </div>
+
+        {/* Resumo Final */}
         {pedidoItems.length > 0 && (
-          <div className="bg-gray-100 p-4 rounded-lg space-y-2">
-            <p className="text-sm text-gray-700 font-semibold">Resumo do Pedido:</p>
-            <div className="space-y-1 text-sm">
-              <div className="flex justify-between text-gray-700">
-                <span>Total de batatas</span>
-                <span>{totalBatatas}</span>
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 mb-8 border-3 border-green-400">
+            <h3 className="text-xl font-bold text-green-700 mb-4">Resumo do Pedido</h3>
+            
+            <div className="space-y-2 text-gray-700">
+              <div className="flex justify-between">
+                <span>Subtotal:</span>
+                <span className="font-bold">
+                  R$ {pedidoItems.reduce((sum, item) => {
+                    const precoUnitario = obterPreco(item.sabor);
+                    const totalAdicionais = item.adicionais.length * 3;
+                    return sum + ((precoUnitario + totalAdicionais) * item.quantidade);
+                  }, 0).toFixed(2)}
+                </span>
               </div>
-              <div className="flex justify-between text-gray-700">
-                <span>Subtotal</span>
-                <span>R$ {subtotal.toFixed(2).replace('.', ',')}</span>
+              
+              <div className="flex justify-between">
+                <span>Frete ({cidade || 'selecione cidade'}):</span>
+                <span className="font-bold">R$ {calcularFrete().toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-gray-700">
-                <span>Frete ({cidade || 'cidade não informada'})</span>
-                <span className="font-semibold">R$ {frete.toFixed(2).replace('.', ',')}</span>
-              </div>
-              <div className="border-t border-gray-300 pt-2 flex justify-between">
-                <span className="font-bold text-gray-900">Total:</span>
-                <span className="text-lg font-bold text-red-600">R$ {total.toFixed(2).replace('.', ',')}</span>
+              
+              <div className="border-t-2 border-green-300 pt-2 flex justify-between text-lg">
+                <span className="font-bold">TOTAL:</span>
+                <span className="font-bold text-green-700">
+                  R$ {(pedidoItems.reduce((sum, item) => {
+                    const precoUnitario = obterPreco(item.sabor);
+                    const totalAdicionais = item.adicionais.length * 3;
+                    return sum + ((precoUnitario + totalAdicionais) * item.quantidade);
+                  }, 0) + calcularFrete()).toFixed(2)}
+                </span>
               </div>
             </div>
           </div>
         )}
 
-        {/* Botão Enviar via WhatsApp */}
+        {/* Botão Enviar */}
         <Button
           onClick={handleEnviarPedido}
-          className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition text-lg"
-          disabled={pedidoItems.length === 0}
+          disabled={pedidoItems.length === 0 || !nomeCliente || !telefoneCliente || !enderecoEntrega || !cidade}
+          className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 rounded-lg text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          <MessageCircle size={20} />
+          <MessageCircle className="w-6 h-6" />
           Enviar Pedido via WhatsApp
         </Button>
+
+        <p className="text-center text-sm text-gray-600 mt-4">
+          * Campos obrigatórios
+        </p>
       </div>
     </div>
   );
