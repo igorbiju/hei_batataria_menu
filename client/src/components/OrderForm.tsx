@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, X, Plus, Minus } from 'lucide-react';
+import { MessageCircle, X, Plus, Minus, Gift, Check } from 'lucide-react';
 
 interface MenuItem {
   sabor: string;
@@ -17,6 +17,15 @@ interface PedidoItem {
   quantidade: number;
   adicionais: string[];
 }
+
+// Mapeamento de cupons de desconto disponíveis
+const cuponsdisponveis: { [key: string]: { desconto: number; tipo: 'percentual' | 'fixo'; descricao: string } } = {
+  'PROMO10': { desconto: 10, tipo: 'percentual', descricao: '10% de desconto' },
+  'PROMO20': { desconto: 20, tipo: 'percentual', descricao: '20% de desconto' },
+  'DESCONTO5': { desconto: 5, tipo: 'fixo', descricao: 'R$ 5,00 de desconto' },
+  'DESCONTO10': { desconto: 10, tipo: 'fixo', descricao: 'R$ 10,00 de desconto' },
+  'FRETEGRATIS': { desconto: 100, tipo: 'percentual', descricao: 'Frete grátis' },
+};
 
 // Mapeamento de quais adicionais estão disponíveis em cada sabor
 const adicionaisDisponiveis: { [key: string]: string[] } = {
@@ -43,6 +52,9 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
   const [telefoneCliente, setTelefoneCliente] = useState('');
   const [enderecoEntrega, setEnderecoEntrega] = useState('');
   const [cidade, setCidade] = useState('');
+  const [cupom, setCupom] = useState('');
+  const [cupomAplicado, setCupomAplicado] = useState<{ codigo: string; desconto: number; tipo: 'percentual' | 'fixo' } | null>(null);
+  const [mensagemCupom, setMensagemCupom] = useState('');
 
   const adicionarSabor = () => {
     if (!selectedSabor) {
@@ -111,6 +123,45 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
     return parseFloat(preco);
   };
 
+  const aplicarCupom = () => {
+    const cupomUpper = cupom.toUpperCase().trim();
+    
+    if (!cupomUpper) {
+      setMensagemCupom('Por favor, digite um cupom!');
+      return;
+    }
+
+    if (cuponsdisponveis[cupomUpper]) {
+      const cupomInfo = cuponsdisponveis[cupomUpper];
+      setCupomAplicado({
+        codigo: cupomUpper,
+        desconto: cupomInfo.desconto,
+        tipo: cupomInfo.tipo
+      });
+      setMensagemCupom(`✓ Cupom "${cupomUpper}" aplicado! ${cupomInfo.descricao}`);
+      setCupom('');
+    } else {
+      setMensagemCupom('✗ Cupom inválido!');
+      setCupomAplicado(null);
+    }
+  };
+
+  const removerCupom = () => {
+    setCupomAplicado(null);
+    setCupom('');
+    setMensagemCupom('');
+  };
+
+  const calcularDesconto = (subtotal: number): number => {
+    if (!cupomAplicado) return 0;
+    
+    if (cupomAplicado.tipo === 'percentual') {
+      return subtotal * (cupomAplicado.desconto / 100);
+    } else {
+      return cupomAplicado.desconto;
+    }
+  };
+
   const handleEnviarPedido = () => {
     if (!nomeCliente || !telefoneCliente || !enderecoEntrega || !cidade) {
       alert('Por favor, preencha todos os campos obrigatórios (Nome, Telefone, Endereço e Cidade)!');
@@ -125,6 +176,7 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
     // Calcular totais
     let subtotal = 0;
     let detalhePedido = '';
+    let detalheCupom = '';
 
     pedidoItems.forEach((item, index) => {
       const precoUnitario = obterPreco(item.sabor);
@@ -146,7 +198,21 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
     });
 
     const frete = calcularFrete();
-    const total = subtotal + frete;
+    const desconto = calcularDesconto(subtotal);
+    const totalComDesconto = subtotal - desconto;
+    const total = totalComDesconto + frete;
+
+    if (cupomAplicado) {
+      if (cupomAplicado.tipo === 'percentual') {
+        detalheCupom = `*Cupom:* ${cupomAplicado.codigo} (${cupomAplicado.desconto}% de desconto)
+*Desconto:* -R$ ${desconto.toFixed(2)}
+`;
+      } else {
+        detalheCupom = `*Cupom:* ${cupomAplicado.codigo} (R$ ${cupomAplicado.desconto.toFixed(2)} de desconto)
+*Desconto:* -R$ ${Math.min(desconto, subtotal).toFixed(2)}
+`;
+      }
+    }
 
     const mensagem = `*NOVO PEDIDO HEI! BATATARIA* 🍟\n\n` +
       `*Cliente:* ${nomeCliente}\n` +
@@ -156,6 +222,7 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
       `*DETALHES DO PEDIDO:*\n` +
       `${detalhePedido}\n` +
       `*Subtotal:* R$ ${subtotal.toFixed(2)}\n` +
+      `${detalheCupom}` +
       `*Frete (${cidade}):* R$ ${frete.toFixed(2)}\n` +
       `*TOTAL:* R$ ${total.toFixed(2)}\n\n` +
       `Obrigado! 😊`;
@@ -347,38 +414,108 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
           />
         </div>
 
+        {/* Seção de Cupom de Desconto */}
+        {pedidoItems.length > 0 && (
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 mb-8 border-2 border-purple-300">
+            <h3 className="text-xl font-bold text-purple-600 mb-4 flex items-center gap-2">
+              <Gift className="w-6 h-6" />
+              Cupom de Desconto
+            </h3>
+            
+            {!cupomAplicado ? (
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600 mb-3">Cupons disponíveis: PROMO10, PROMO20, DESCONTO5, DESCONTO10, FRETEGRATIS</p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Digite seu cupom aqui..."
+                    value={cupom}
+                    onChange={(e) => setCupom(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && aplicarCupom()}
+                    className="flex-1 p-3 border-2 border-purple-300 rounded-lg focus:outline-none focus:border-purple-500 uppercase"
+                  />
+                  <Button
+                    onClick={aplicarCupom}
+                    className="bg-purple-500 hover:bg-purple-600 text-white font-bold px-6 rounded-lg"
+                  >
+                    Aplicar
+                  </Button>
+                </div>
+                {mensagemCupom && (
+                  <p className={`text-sm font-semibold ${
+                    mensagemCupom.includes('✓') ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {mensagemCupom}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="bg-white p-4 rounded-lg border-2 border-green-400 flex justify-between items-center">
+                <div>
+                  <p className="font-bold text-green-600 flex items-center gap-2">
+                    <Check className="w-5 h-5" />
+                    Cupom aplicado: {cupomAplicado.codigo}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {cupomAplicado.tipo === 'percentual' 
+                      ? `${cupomAplicado.desconto}% de desconto`
+                      : `R$ ${cupomAplicado.desconto.toFixed(2)} de desconto`
+                    }
+                  </p>
+                </div>
+                <Button
+                  onClick={removerCupom}
+                  className="bg-red-500 hover:bg-red-600 text-white font-bold px-4 rounded-lg"
+                >
+                  Remover
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Resumo Final */}
         {pedidoItems.length > 0 && (
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 mb-8 border-3 border-green-400">
             <h3 className="text-xl font-bold text-green-700 mb-4">Resumo do Pedido</h3>
             
             <div className="space-y-2 text-gray-700">
-              <div className="flex justify-between">
-                <span>Subtotal:</span>
-                <span className="font-bold">
-                  R$ {pedidoItems.reduce((sum, item) => {
-                    const precoUnitario = obterPreco(item.sabor);
-                    const totalAdicionais = item.adicionais.length * 3;
-                    return sum + ((precoUnitario + totalAdicionais) * item.quantidade);
-                  }, 0).toFixed(2)}
-                </span>
-              </div>
-              
-              <div className="flex justify-between">
-                <span>Frete ({cidade || 'selecione cidade'}):</span>
-                <span className="font-bold">R$ {calcularFrete().toFixed(2)}</span>
-              </div>
-              
-              <div className="border-t-2 border-green-300 pt-2 flex justify-between text-lg">
-                <span className="font-bold">TOTAL:</span>
-                <span className="font-bold text-green-700">
-                  R$ {(pedidoItems.reduce((sum, item) => {
-                    const precoUnitario = obterPreco(item.sabor);
-                    const totalAdicionais = item.adicionais.length * 3;
-                    return sum + ((precoUnitario + totalAdicionais) * item.quantidade);
-                  }, 0) + calcularFrete()).toFixed(2)}
-                </span>
-              </div>
+              {(() => {
+                const subtotal = pedidoItems.reduce((sum, item) => {
+                  const precoUnitario = obterPreco(item.sabor);
+                  const totalAdicionais = item.adicionais.length * 3;
+                  return sum + ((precoUnitario + totalAdicionais) * item.quantidade);
+                }, 0);
+                const desconto = calcularDesconto(subtotal);
+                const frete = calcularFrete();
+                const total = subtotal - desconto + frete;
+
+                return (
+                  <>
+                    <div className="flex justify-between">
+                      <span>Subtotal:</span>
+                      <span className="font-bold">R$ {subtotal.toFixed(2)}</span>
+                    </div>
+                    
+                    {cupomAplicado && (
+                      <div className="flex justify-between text-green-600">
+                        <span>Desconto ({cupomAplicado.codigo}):</span>
+                        <span className="font-bold">-R$ {desconto.toFixed(2)}</span>
+                      </div>
+                    )}
+                    
+                    <div className="flex justify-between">
+                      <span>Frete ({cidade || 'selecione cidade'}):</span>
+                      <span className="font-bold">R$ {frete.toFixed(2)}</span>
+                    </div>
+                    
+                    <div className="border-t-2 border-green-300 pt-2 flex justify-between text-lg">
+                      <span className="font-bold">TOTAL:</span>
+                      <span className="font-bold text-green-700">R$ {total.toFixed(2)}</span>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
         )}
