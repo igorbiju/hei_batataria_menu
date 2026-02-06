@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { LogOut, Plus, Trash2, Power, Eye, EyeOff } from 'lucide-react';
+import { LogOut, Plus, Trash2, Power, Eye, EyeOff, Edit2 } from 'lucide-react';
 
 interface Cupom {
   codigo: string;
@@ -9,19 +9,42 @@ interface Cupom {
   ativo: boolean;
 }
 
+interface MenuItem {
+  sabor: string;
+  preco: string;
+}
+
 interface AdminState {
   isLoggedIn: boolean;
   cupons: Cupom[];
+  menuItems: MenuItem[];
 }
 
 export default function Admin() {
-  // Carregar cupons do localStorage
+  // Carregar cupons e menu do localStorage
   const cuponsArmazenados = localStorage.getItem('cupons_hei_batataria');
   const cuponsIniciais = cuponsArmazenados ? JSON.parse(cuponsArmazenados) : [];
+  
+  const menuArmazenado = localStorage.getItem('menu_hei_batataria');
+  const menuInicial = menuArmazenado ? JSON.parse(menuArmazenado) : [
+    { sabor: 'BACON COM CHEDDAR', preco: 'R$ 24,90' },
+    { sabor: 'BACON COM CATUPIRY', preco: 'R$ 24,90' },
+    { sabor: 'CALABRESA COM CHEDDAR', preco: 'R$ 24,90' },
+    { sabor: 'CALABRESA COM CATUPIRY', preco: 'R$ 24,90' },
+    { sabor: 'CARNE COM CHEDDAR', preco: 'R$ 24,90' },
+    { sabor: 'CARNE COM CATUPIRY', preco: 'R$ 24,90' },
+    { sabor: 'PALMITO COM CHEDDAR', preco: 'R$ 24,90' },
+    { sabor: 'PALMITO COM CATUPIRY', preco: 'R$ 24,90' },
+    { sabor: 'PIZZA', preco: 'R$ 24,90' },
+    { sabor: 'HOT DOG (NOVO!)', preco: 'R$ 24,90' },
+    { sabor: 'STROGONOFF DE FRANGO (ESPECIAL!)', preco: 'R$ 29,90' },
+    { sabor: 'COSTELA', preco: 'R$ 34,90' }
+  ];
 
   const [adminState, setAdminState] = useState<AdminState>({
     isLoggedIn: false,
-    cupons: cuponsIniciais
+    cupons: cuponsIniciais,
+    menuItems: menuInicial
   });
 
   const [username, setUsername] = useState('');
@@ -33,6 +56,10 @@ export default function Admin() {
   const [novoCupomCodigo, setNovoCupomCodigo] = useState('');
   const [novoCupomDesconto, setNovoCupomDesconto] = useState('');
   const [novoCupomTipo, setNovoCupomTipo] = useState<'percentual' | 'fixo'>('percentual');
+  
+  // Edicao de precos
+  const [precoEditando, setPrecoEditando] = useState<string | null>(null);
+  const [novoPreco, setNovoPreco] = useState('');
 
   const handleLogin = () => {
     if (username === 'igorbiju' && password === 'Heloisa@2022') {
@@ -47,8 +74,30 @@ export default function Admin() {
 
   const handleLogout = () => {
     setAdminState({ ...adminState, isLoggedIn: false });
-    // Redirecionar para home
     window.location.href = '/';
+  };
+
+  const atualizarPreco = (sabor: string, novoValor: string) => {
+    if (!novoValor) {
+      alert('Por favor, digite um valor!');
+      return;
+    }
+    const novosItems = adminState.menuItems.map(item =>
+      item.sabor === sabor ? { ...item, preco: novoValor } : item
+    );
+    setAdminState({
+      ...adminState,
+      menuItems: novosItems
+    });
+    localStorage.setItem('menu_hei_batataria', JSON.stringify(novosItems));
+    setPrecoEditando(null);
+    setNovoPreco('');
+    alert('Preco atualizado com sucesso!');
+  };
+
+  const cancelarEdicaoPreco = () => {
+    setPrecoEditando(null);
+    setNovoPreco('');
   };
 
   const adicionarCupom = () => {
@@ -273,6 +322,64 @@ export default function Admin() {
                 <strong>💡 Dica:</strong> Ative apenas os cupons que deseja disponibilizar para os clientes. Os cupons inativos não aparecerão no formulário de pedidos.
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Edicao de Precos */}
+        <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <Edit2 className="w-6 h-6" />
+            Promocao Relampago - Editar Precos
+          </h2>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            {adminState.menuItems.map((item) => (
+              <div key={item.sabor} className="bg-gray-50 p-4 rounded-lg border-2 border-gray-300">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <p className="font-bold text-gray-800">{item.sabor}</p>
+                    <p className="text-lg font-bold text-[#EF2B2D]">{item.preco}</p>
+                  </div>
+                </div>
+                {precoEditando === item.sabor ? (
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      placeholder="Ex: R$ 19,90"
+                      value={novoPreco}
+                      onChange={(e) => setNovoPreco(e.target.value)}
+                      className="w-full p-2 border-2 border-blue-500 rounded-lg focus:outline-none"
+                      autoFocus
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => atualizarPreco(item.sabor, novoPreco)}
+                        className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition"
+                      >
+                        Salvar
+                      </button>
+                      <button
+                        onClick={cancelarEdicaoPreco}
+                        className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 rounded-lg transition"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setPrecoEditando(item.sabor);
+                      setNovoPreco(item.preco);
+                    }}
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded-lg transition flex items-center justify-center gap-2"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    Editar Preco
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
