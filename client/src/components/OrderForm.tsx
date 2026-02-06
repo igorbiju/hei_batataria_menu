@@ -8,8 +8,16 @@ interface MenuItem {
   preco: string;
 }
 
+interface Cupom {
+  codigo: string;
+  desconto: number;
+  tipo: 'percentual' | 'fixo';
+  ativo: boolean;
+}
+
 interface OrderFormProps {
   menuItems: MenuItem[];
+  cuponsDisponiveis?: Cupom[];
 }
 
 interface PedidoItem {
@@ -43,7 +51,7 @@ const adicionaisDisponiveis: { [key: string]: string[] } = {
   'COSTELA': ['bacon', 'calabresa', 'cheddar', 'catupiry', 'muçarela'],
 };
 
-export default function OrderForm({ menuItems }: OrderFormProps) {
+export default function OrderForm({ menuItems, cuponsDisponiveis = [] }: OrderFormProps) {
   const [pedidoItems, setPedidoItems] = useState<PedidoItem[]>([]);
   const [selectedSabor, setSelectedSabor] = useState('');
   const [quantidade, setQuantidade] = useState(1);
@@ -131,14 +139,18 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
       return;
     }
 
-    if (cuponsdisponveis[cupomUpper]) {
-      const cupomInfo = cuponsdisponveis[cupomUpper];
+    const cupomEncontrado = cuponsDisponiveis.find(c => c.codigo === cupomUpper);
+    
+    if (cupomEncontrado) {
       setCupomAplicado({
         codigo: cupomUpper,
-        desconto: cupomInfo.desconto,
-        tipo: cupomInfo.tipo
+        desconto: cupomEncontrado.desconto,
+        tipo: cupomEncontrado.tipo
       });
-      setMensagemCupom(`✓ Cupom "${cupomUpper}" aplicado! ${cupomInfo.descricao}`);
+      const descricao = cupomEncontrado.tipo === 'percentual' 
+        ? `${cupomEncontrado.desconto}% de desconto`
+        : `R$ ${cupomEncontrado.desconto.toFixed(2)} de desconto`;
+      setMensagemCupom(`✓ Cupom "${cupomUpper}" aplicado! ${descricao}`);
       setCupom('');
     } else {
       setMensagemCupom('✗ Cupom inválido!');
@@ -424,7 +436,12 @@ export default function OrderForm({ menuItems }: OrderFormProps) {
             
             {!cupomAplicado ? (
               <div className="space-y-3">
-                <p className="text-sm text-gray-600 mb-3">Cupons disponíveis: PROMO10, PROMO20, DESCONTO5, DESCONTO10, FRETEGRATIS</p>
+                {cuponsDisponiveis.length > 0 && (
+                  <p className="text-sm text-gray-600 mb-3">Cupons disponíveis: {cuponsDisponiveis.map(c => c.codigo).join(', ')}</p>
+                )}
+                {cuponsDisponiveis.length === 0 && (
+                  <p className="text-sm text-red-600 mb-3">Nenhum cupom disponível no momento</p>
+                )}
                 <div className="flex gap-2">
                   <input
                     type="text"

@@ -12,8 +12,16 @@ interface MenuItem {
   preco: string;
 }
 
+interface Cupom {
+  codigo: string;
+  desconto: number;
+  tipo: 'percentual' | 'fixo';
+  ativo: boolean;
+}
+
 export default function Home() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [cupons, setCupons] = useState<Cupom[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -82,6 +90,14 @@ export default function Home() {
     ];
 
     setMenuItems(items);
+    
+    // Cupons padrao - voce pode editar
+    const cuponsDefault: Cupom[] = [
+      { codigo: 'BEMVINDO10', desconto: 10, tipo: 'percentual', ativo: true },
+      { codigo: 'PROMO20', desconto: 20, tipo: 'percentual', ativo: false },
+    ];
+    
+    setCupons(cuponsDefault);
     setLoading(false);
   }, []);
 
@@ -173,7 +189,7 @@ export default function Home() {
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto">
-            {!loading && <OrderForm menuItems={menuItems} />}
+            {!loading && <OrderForm menuItems={menuItems} cuponsDisponiveis={cupons.filter(c => c.ativo)} />}
           </div>
         </div>
       </section>
