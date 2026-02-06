@@ -3,7 +3,8 @@ import FloatingContact from '@/components/FloatingContact';
 import OrderForm from '@/components/OrderForm';
 import BusinessHours from '@/components/BusinessHours';
 import ShareButton from '@/components/ShareButton';
-import { ChefHat } from 'lucide-react';
+import { ChefHat, Settings } from 'lucide-react';
+import { useLocation } from 'wouter';
 import { useEffect, useState } from 'react';
 
 interface MenuItem {
@@ -20,6 +21,7 @@ interface Cupom {
 }
 
 export default function Home() {
+  const [, navigate] = useLocation();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [cupons, setCupons] = useState<Cupom[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,18 +93,34 @@ export default function Home() {
 
     setMenuItems(items);
     
-    // Cupons padrao - voce pode editar
-    const cuponsDefault: Cupom[] = [
-      { codigo: 'BEMVINDO10', desconto: 10, tipo: 'percentual', ativo: true },
-      { codigo: 'PROMO20', desconto: 20, tipo: 'percentual', ativo: false },
-    ];
+    // Carregar cupons do localStorage (salvos no painel admin)
+    const cuponsArmazenados = localStorage.getItem('cupons_hei_batataria');
+    if (cuponsArmazenados) {
+      try {
+        setCupons(JSON.parse(cuponsArmazenados));
+      } catch (e) {
+        setCupons([]);
+      }
+    } else {
+      setCupons([]);
+    }
     
-    setCupons(cuponsDefault);
     setLoading(false);
   }, []);
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Botão Admin */}
+      <div className="fixed top-4 right-4 z-50">
+        <button
+          onClick={() => navigate('/admin')}
+          className="bg-gradient-to-r from-[#EF2B2D] to-[#FF6B35] hover:from-[#D41F1F] hover:to-[#E55A2B] text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 shadow-lg transition transform hover:scale-105"
+        >
+          <Settings className="w-5 h-5" />
+          Painel Admin
+        </button>
+      </div>
+
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[#EF2B2D] via-[#FF6B35] to-[#EF2B2D] pt-12 pb-16">
         {/* Padrão de fundo */}

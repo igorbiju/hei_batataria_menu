@@ -15,12 +15,13 @@ interface AdminState {
 }
 
 export default function Admin() {
+  // Carregar cupons do localStorage
+  const cuponsArmazenados = localStorage.getItem('cupons_hei_batataria');
+  const cuponsIniciais = cuponsArmazenados ? JSON.parse(cuponsArmazenados) : [];
+
   const [adminState, setAdminState] = useState<AdminState>({
     isLoggedIn: false,
-    cupons: [
-      { codigo: 'BEMVINDO10', desconto: 10, tipo: 'percentual', ativo: true },
-      { codigo: 'PROMO20', desconto: 20, tipo: 'percentual', ativo: false },
-    ]
+    cupons: cuponsIniciais
   });
 
   const [username, setUsername] = useState('');
@@ -46,6 +47,8 @@ export default function Admin() {
 
   const handleLogout = () => {
     setAdminState({ ...adminState, isLoggedIn: false });
+    // Redirecionar para home
+    window.location.href = '/';
   };
 
   const adicionarCupom = () => {
@@ -67,30 +70,39 @@ export default function Admin() {
       ativo: true
     };
 
-    setAdminState({
+    const novosCupons = [...adminState.cupons, novoCupom];
+    const novoState = {
       ...adminState,
-      cupons: [...adminState.cupons, novoCupom]
-    });
+      cupons: novosCupons
+    };
+    
+    setAdminState(novoState);
+    localStorage.setItem('cupons_hei_batataria', JSON.stringify(novosCupons));
 
     setNovoCupomCodigo('');
     setNovoCupomDesconto('');
     setNovoCupomTipo('percentual');
+    alert('Cupom criado com sucesso!');
   };
 
   const removerCupom = (codigo: string) => {
+    const novosCupons = adminState.cupons.filter(c => c.codigo !== codigo);
     setAdminState({
       ...adminState,
-      cupons: adminState.cupons.filter(c => c.codigo !== codigo)
+      cupons: novosCupons
     });
+    localStorage.setItem('cupons_hei_batataria', JSON.stringify(novosCupons));
   };
 
   const toggleCupom = (codigo: string) => {
+    const novosCupons = adminState.cupons.map(c =>
+      c.codigo === codigo ? { ...c, ativo: !c.ativo } : c
+    );
     setAdminState({
       ...adminState,
-      cupons: adminState.cupons.map(c =>
-        c.codigo === codigo ? { ...c, ativo: !c.ativo } : c
-      )
+      cupons: novosCupons
     });
+    localStorage.setItem('cupons_hei_batataria', JSON.stringify(novosCupons));
   };
 
   if (!adminState.isLoggedIn) {
@@ -147,8 +159,11 @@ export default function Admin() {
             </Button>
           </div>
 
-          <p className="text-center text-xs text-gray-500 mt-6">
+            <p className="text-center text-xs text-gray-500 mt-6">
             Painel restrito para administradores
+          </p>
+          <p className="text-center text-xs text-gray-500 mt-2">
+            <a href="/" className="text-blue-600 hover:underline">Voltar para o cardápio</a>
           </p>
         </div>
       </div>
