@@ -239,9 +239,40 @@ export default function OrderForm({ menuItems, cuponsDisponiveis = [] }: OrderFo
       `*TOTAL:* R$ ${total.toFixed(2)}\n\n` +
       `Obrigado! 😊`;
 
+    // Salvar pontos de fidelidade
+    const clientesArmazenados = localStorage.getItem('clientes_fidelidade_hei_batataria');
+    const clientes = clientesArmazenados ? JSON.parse(clientesArmazenados) : {};
+    
+    const pontosCriados = Math.floor(total);
+    if (clientes[telefoneCliente]) {
+      clientes[telefoneCliente] = {
+        ...clientes[telefoneCliente],
+        pontos: (clientes[telefoneCliente].pontos || 0) + pontosCriados,
+        totalGasto: (clientes[telefoneCliente].totalGasto || 0) + total,
+        ultimaCompra: new Date().toLocaleDateString('pt-BR')
+      };
+    } else {
+      clientes[telefoneCliente] = {
+        telefone: telefoneCliente,
+        pontos: pontosCriados,
+        totalGasto: total,
+        ultimaCompra: new Date().toLocaleDateString('pt-BR')
+      };
+    }
+    localStorage.setItem('clientes_fidelidade_hei_batataria', JSON.stringify(clientes));
+
     const numeroWhatsApp = '5543988697421';
     const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
     window.open(urlWhatsApp, '_blank');
+    
+    alert('Pedido enviado! Voce acumulou ' + pontosCriados + ' pontos de fidelidade!');
+  };
+
+  const obterPontosCliente = () => {
+    if (!telefoneCliente) return 0;
+    const clientesArmazenados = localStorage.getItem('clientes_fidelidade_hei_batataria');
+    const clientes = clientesArmazenados ? JSON.parse(clientesArmazenados) : {};
+    return clientes[telefoneCliente]?.pontos || 0;
   };
 
   const adicionaisDisponivelParaSabor = selectedSabor ? (adicionaisDisponiveis[selectedSabor] || []) : [];

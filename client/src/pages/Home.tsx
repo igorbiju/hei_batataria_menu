@@ -3,6 +3,7 @@ import FloatingContact from '@/components/FloatingContact';
 import OrderForm from '@/components/OrderForm';
 import BusinessHours from '@/components/BusinessHours';
 import ShareButton from '@/components/ShareButton';
+import LoyaltyProgram from '@/components/LoyaltyProgram';
 import { ChefHat, Settings } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useEffect, useState } from 'react';
@@ -208,6 +209,15 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto">
             {!loading && <OrderForm menuItems={menuItems} cuponsDisponiveis={cupons.filter(c => c.ativo)} />}
+          </div>
+        </div>
+      </section>
+
+      {/* Loyalty Program Section */}
+      <section className="py-16 bg-gradient-to-br from-amber-50 to-orange-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto">
+            <LoyaltyProgram />
           </div>
         </div>
       </section>
