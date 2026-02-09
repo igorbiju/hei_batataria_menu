@@ -12,6 +12,7 @@ interface Cupom {
 interface MenuItem {
   sabor: string;
   preco: string;
+  disponivel?: boolean;
 }
 
 interface AdminState {
@@ -141,6 +142,17 @@ export default function Admin() {
       cupons: novosCupons
     });
     localStorage.setItem('cupons_hei_batataria', JSON.stringify(novosCupons));
+  };
+
+  const toggleDisponibilidade = (sabor: string) => {
+    const novosItems = adminState.menuItems.map(item =>
+      item.sabor === sabor ? { ...item, disponivel: item.disponivel === false ? true : false } : item
+    );
+    setAdminState({
+      ...adminState,
+      menuItems: novosItems
+    });
+    localStorage.setItem('menu_hei_batataria', JSON.stringify(novosItems));
   };
 
   const toggleCupom = (codigo: string) => {
@@ -378,6 +390,50 @@ export default function Admin() {
                     Editar Preco
                   </button>
                 )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Disponibilidade de Produtos */}
+        <div className="mt-8 bg-white rounded-xl shadow-lg p-6 border-2 border-orange-300">
+          <h2 className="text-2xl font-bold text-orange-600 mb-6">Disponibilidade de Produtos</h2>
+          <p className="text-gray-600 mb-4">Marque os sabores como esgotados para que não apareçam no formulário de pedidos:</p>
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            {adminState.menuItems.map((item) => (
+              <div
+                key={item.sabor}
+                className={`p-4 rounded-lg border-2 flex justify-between items-center ${
+                  item.disponivel !== false
+                    ? 'bg-green-50 border-green-300'
+                    : 'bg-red-50 border-red-300'
+                }`}
+              >
+                <div className="flex-1">
+                  <p className="font-bold text-gray-800">{item.sabor}</p>
+                  <p className="text-sm text-gray-600">{item.preco}</p>
+                </div>
+                <button
+                  onClick={() => toggleDisponibilidade(item.sabor)}
+                  className={`px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2 ${
+                    item.disponivel !== false
+                      ? 'bg-green-500 hover:bg-green-600 text-white'
+                      : 'bg-red-500 hover:bg-red-600 text-white'
+                  }`}
+                >
+                  {item.disponivel !== false ? (
+                    <>
+                      <Eye className="w-4 h-4" />
+                      Disponível
+                    </>
+                  ) : (
+                    <>
+                      <EyeOff className="w-4 h-4" />
+                      Esgotado
+                    </>
+                  )}
+                </button>
               </div>
             ))}
           </div>
