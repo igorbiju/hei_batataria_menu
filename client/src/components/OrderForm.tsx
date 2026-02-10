@@ -192,7 +192,7 @@ export default function OrderForm({ menuItems, cuponsDisponiveis = [] }: OrderFo
 
     if (itensEsgotados.length > 0) {
       const saboresEsgotados = itensEsgotados.map(item => item.sabor).join(', ');
-      alert('DESCULPE! Os seguintes sabores estao ESGOTADOS e nao podem ser comprados no momento:\n\n' + saboresEsgotados + '\n\nPor favor, remova-os do pedido e tente novamente.');
+      alert('Desculpe! Os seguintes sabores estao temporariamente indisponiveis:\n\n' + saboresEsgotados + '\n\nPor favor, remova-os do seu pedido e escolha outros sabores. Voltaremos em breve com esses produtos!');
       return;
     }
 
