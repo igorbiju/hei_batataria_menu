@@ -1,9 +1,9 @@
-import MenuCard from '@/components/MenuCard';
 import FloatingContact from '@/components/FloatingContact';
 import OrderForm from '@/components/OrderForm';
 import BusinessHours from '@/components/BusinessHours';
 import ShareButton from '@/components/ShareButton';
 import LoyaltyProgram from '@/components/LoyaltyProgram';
+import MenuCard from '@/components/MenuCard';
 import { ChefHat, Settings } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useEffect, useState } from 'react';
@@ -12,6 +12,7 @@ interface MenuItem {
   sabor: string;
   descricao: string;
   preco: string;
+  disponivel?: boolean;
 }
 
 interface Cupom {
@@ -92,7 +93,18 @@ export default function Home() {
       }
     ];
 
-    setMenuItems(items);
+    // Carregar disponibilidade do localStorage (salva no painel admin)
+    const menuArmazenado = localStorage.getItem('menu_hei_batataria');
+    if (menuArmazenado) {
+      try {
+        const menuComDisponibilidade = JSON.parse(menuArmazenado);
+        setMenuItems(menuComDisponibilidade);
+      } catch (e) {
+        setMenuItems(items);
+      }
+    } else {
+      setMenuItems(items);
+    }
     
     // Carregar cupons do localStorage (salvos no painel admin)
     const cuponsArmazenados = localStorage.getItem('cupons_hei_batataria');
@@ -196,6 +208,7 @@ export default function Home() {
                     descricao={item.descricao}
                     preco={item.preco}
                     isNew={item.sabor.includes('NOVO!')}
+                    disponivel={item.disponivel !== false}
                   />
                 </div>
               ))}

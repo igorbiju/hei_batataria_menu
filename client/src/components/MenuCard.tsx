@@ -6,6 +6,7 @@ interface MenuCardProps {
   preco: string;
   isNew?: boolean;
   imagem?: string;
+  disponivel?: boolean;
 }
 
 // Mapa de imagens para cada sabor
@@ -24,25 +25,34 @@ const imagemMap: Record<string, string> = {
   'COSTELA': 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663183348486/IWjuhgcbypkzSnOl.png',
 };
 
-export default function MenuCard({ sabor, descricao, preco, isNew }: MenuCardProps) {
+export default function MenuCard({ sabor, descricao, preco, isNew, disponivel = true }: MenuCardProps) {
   const imagemUrl = imagemMap[sabor];
 
   return (
-    <div className="group relative overflow-hidden rounded-lg bg-white shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 border border-gray-100">
+    <div className={`group relative overflow-hidden rounded-lg bg-white shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 border border-gray-100 ${!disponivel ? 'opacity-60' : ''}`}>
       {/* Badge de novo */}
-      {isNew && (
+      {isNew && disponivel && (
         <div className="absolute top-0 right-0 bg-gradient-to-r from-[#FF6B35] to-[#EF2B2D] text-white px-3 py-1 text-xs font-accent font-bold rounded-bl-lg z-10">
           NOVO!
         </div>
       )}
 
+      {/* Badge de indisponível */}
+      {!disponivel && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 z-20 rounded-lg">
+          <div className="bg-red-600 text-white px-6 py-3 rounded-lg font-bold text-lg text-center shadow-lg">
+            INDISPONÍVEL
+          </div>
+        </div>
+      )}
+
       {/* Imagem do produto */}
       {imagemUrl && (
-        <div className="relative w-full h-48 overflow-hidden bg-gray-100">
+        <div className={`relative w-full h-48 overflow-hidden bg-gray-100 ${!disponivel ? 'grayscale' : ''}`}>
           <img
             src={imagemUrl}
             alt={sabor}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            className={`w-full h-full object-cover transition-transform duration-300 ${disponivel ? 'group-hover:scale-110' : ''}`}
             loading="lazy"
           />
           {/* Aviso de foto meramente ilustrativa */}
@@ -79,7 +89,9 @@ export default function MenuCard({ sabor, descricao, preco, isNew }: MenuCardPro
       </div>
 
       {/* Efeito de hover - barra colorida na base */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#EF2B2D] via-[#FFD700] to-[#FF6B35] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+      {disponivel && (
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#EF2B2D] via-[#FFD700] to-[#FF6B35] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+      )}
     </div>
   );
 }
