@@ -397,8 +397,11 @@ export default function Admin() {
 
         {/* Disponibilidade de Produtos */}
         <div className="mt-8 bg-white rounded-xl shadow-lg p-6 border-2 border-orange-300">
-          <h2 className="text-2xl font-bold text-orange-600 mb-6">Disponibilidade de Produtos</h2>
-          <p className="text-gray-600 mb-4">Marque os sabores como esgotados para que não apareçam no formulário de pedidos:</p>
+          <h2 className="text-2xl font-bold text-orange-600 mb-2 flex items-center gap-2">
+            <Eye className="w-6 h-6" />
+            Gerenciar Disponibilidade de Produtos
+          </h2>
+          <p className="text-gray-600 mb-6">Clique no botão para marcar um sabor como <strong>ESGOTADO</strong>. Produtos esgotados não aparecerão no formulário de pedidos dos clientes:</p>
           
           <div className="grid md:grid-cols-2 gap-4">
             {adminState.menuItems.map((item) => (
@@ -416,21 +419,21 @@ export default function Admin() {
                 </div>
                 <button
                   onClick={() => toggleDisponibilidade(item.sabor)}
-                  className={`px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2 ${
+                  className={`px-6 py-3 rounded-lg font-bold transition flex items-center gap-2 text-white ${
                     item.disponivel !== false
-                      ? 'bg-green-500 hover:bg-green-600 text-white'
-                      : 'bg-red-500 hover:bg-red-600 text-white'
+                      ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
+                      : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'
                   }`}
                 >
                   {item.disponivel !== false ? (
                     <>
-                      <Eye className="w-4 h-4" />
-                      Disponível
+                      <Eye className="w-5 h-5" />
+                      DISPONÍVEL
                     </>
                   ) : (
                     <>
-                      <EyeOff className="w-4 h-4" />
-                      Esgotado
+                      <EyeOff className="w-5 h-5" />
+                      ESGOTADO
                     </>
                   )}
                 </button>

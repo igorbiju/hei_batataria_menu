@@ -181,6 +181,21 @@ export default function OrderForm({ menuItems, cuponsDisponiveis = [] }: OrderFo
       return;
     }
 
+    // Verificar se algum item foi marcado como esgotado
+    const menuArmazenado = localStorage.getItem('menu_hei_batataria');
+    const menuAtualizado = menuArmazenado ? JSON.parse(menuArmazenado) : menuItems;
+    
+    const itensEsgotados = pedidoItems.filter(item => {
+      const menuItem = menuAtualizado.find((m: MenuItem) => m.sabor === item.sabor);
+      return menuItem && menuItem.disponivel === false;
+    });
+
+    if (itensEsgotados.length > 0) {
+      const saboresEsgotados = itensEsgotados.map(item => item.sabor).join(', ');
+      alert('DESCULPE! Os seguintes sabores estao ESGOTADOS e nao podem ser comprados no momento:\n\n' + saboresEsgotados + '\n\nPor favor, remova-os do pedido e tente novamente.');
+      return;
+    }
+
     // Calcular totais
     let subtotal = 0;
     let detalhePedido = '';
